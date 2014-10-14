@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
-import getopt, sys, socket, os
+import getopt, sys, socket, os, json
 
 names = ""
 results = ""
+verbose = False
 
 # Conversion d'un hostname en adresse IP
 def host2ip(hostname):
@@ -18,16 +19,17 @@ def groupbyip(host):
 
 # Aide
 def usage():
-    print "Usage: "+sys.argv[0]+" -i <liste> -o <fichier>"
-    print "OR: "+sys.argv[0]+" -f <fichier> -o <fichier>"
+    print "Usage: "+sys.argv[0]+" -i <liste> -o <fichier> [-v]"
+    print "OR: "+sys.argv[0]+" -f <fichier> -o <fichier> [-v]"
     print "  -h, --help\t\taffiche ce message"
     print "  -i, --input=\t\tliste de hostnames"
     print "  -f, --input-file=\t\tfichier de hostnames"
     print "  -o, --output=\t\tfichier de sortie"
+    print "  -v, --verbose=\t\taffiche la sortie"
 
 # Verification des parametres
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "hi:f:o:", ["help", "input=", "input-file=", "output="])
+    opts, args = getopt.getopt(sys.argv[1:], "hi:f:o:v", ["help", "input=", "input-file=", "output=", "verbose"])
 except getopt.GetoptError as err:
     print str(err)
     usage()
@@ -43,6 +45,8 @@ for opt,arg in opts:
         names = arg
     elif opt in ("-o", "--output"):
         results = arg
+    elif opt in ("-v", "--verbose"):
+        verbose = True
     else:
         sys.exit(2)
 
@@ -65,6 +69,10 @@ else:
         groupbyip(host)
     f.close()
 
-print values
+if verbose:
+    print json.dumps(values, indent=4, sort_keys=True)
+
+with open(results, 'w') as out:
+    json.dump(values, out)
 
 sys.exit(0)
