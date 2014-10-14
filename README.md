@@ -14,6 +14,6 @@ hostname2ip.py -i <fichier> -o <fichier.json> [-v]
 Ce script utilise les fichiers JSON générés par hostnames2ip.py pour créer des fichiers de configuration nagios. Les fichiers créés contiennent la définition du host et les services HTTP et/ou HTTPs après vérification par le script pour chacun des noms correspondant à une url.
 
 ```bash
-json2nagios.py -i <fichier.json>
+json2nagios.py -i <fichier.json> [-o <repertoire>] [-v]
 ```
 

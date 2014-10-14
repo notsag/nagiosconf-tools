@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
-import getopt, sys, urllib2, json
+import getopt, os, sys, urllib2, json
 
 data = ""
+output_dir = ""
+verbose = False
 BASECONF_HOST="define host {\nuse\tgeneric-host,ssh\ncontact_groups\tadmins\nhost_name\tHOSTNAME\naddress\tIPADDRESS\n}\n"
 BASECONF_SERVICE="define service {\nuse\tgeneric-service\nhost_name\tHOSTNAME\nservice_description\tURL\ncheck_command\tCOMMAND\n}\n"
 
@@ -22,13 +24,15 @@ def check_http(host, ssl=False):
 
 # Aide
 def usage():
-    print "Usage: "+sys.argv[0]+" -i <fichier>"
+    print "Usage: "+sys.argv[0]+" -i <fichier> [-o <repertoire>] [-v]"
     print "  -h, --help\t\taffiche ce message"
     print "  -i, --input=\t\tfichier json genere par hostnames2ip.py"
+    print "  -o, --output=\t\trepertoire destination"
+    print "  -v, --verbose\t\taffiche la configuration generee"
 
 # Verification des parametres
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "hi:", ["help", "input=", "input-file="])
+    opts, args = getopt.getopt(sys.argv[1:], "hi:o:v", ["help", "input=",  "output=", "verbose"])
 except getopt.GetoptError as err:
     print str(err)
     usage()
@@ -40,8 +44,17 @@ for opt,arg in opts:
         sys.exit(0)
     elif opt in ("-i", "--input"):
         data = arg
+    elif opt in ("-o", "--output"):
+        output_dir = arg
+    elif opt in ("-v", "--verbose"):
+        verbose = True
     else:
         sys.exit(2)
+
+# Creation du repertoire destination si besoin
+if not output_dir == "":
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
 
 if data == "":
     usage()
@@ -56,7 +69,9 @@ json_data.close()
 for row in data['data']:
     # Le hostname dans nagios correspond au premier nom
     hn = row[u'hosts'][0]
-    config_f = open(hn+'.cfg', 'w')
+    if not output_dir == "":
+        config_f = open(output_dir+'/'+hn+'.cfg', 'w')
+    else: config_f = open(hn+'.cfg', 'w')
     config_host = BASECONF_HOST.replace('IPADDRESS', row[u'ip']).replace('HOSTNAME', hn)
     # On verifie que le nom repond en http et https
     config_services = ""
@@ -70,6 +85,8 @@ for row in data['data']:
             config_services = config_services + BASECONF_SERVICE.replace('HOSTNAME', hn).replace('URL', url).replace('COMMAND', 'check_myhttps_certificate!'+url)
     # On concatene conf host et services puis on ecrit le fichier
     conf = config_host + config_services
+    if verbose:
+        print conf + "\n"
     config_f.write(conf)
     config_f.close()
 
