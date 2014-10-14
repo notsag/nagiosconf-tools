@@ -84,11 +84,11 @@ for row in data['data']:
         for url in row[u'hosts']:
             # Si reponse HTTP on cree le service http
             if check_http(url):
-                config_services = config_services + BASECONF_SERVICE.replace('HOSTNAME', hn).replace('URL', url).replace('COMMAND', 'check_myhttp!'+url)
+                config_services = config_services + BASECONF_SERVICE.replace('HOSTNAME', hn).replace('URL', 'http://'+url).replace('COMMAND', 'check_myhttp!'+url)
             # Si reponse HTTPs on cree les services https et https_certificate
             if check_http(url, ssl=True):
-                config_services = config_services + BASECONF_SERVICE.replace('HOSTNAME', hn).replace('URL', url).replace('COMMAND', 'check_myhttps!'+url)
-                config_services = config_services + BASECONF_SERVICE.replace('HOSTNAME', hn).replace('URL', url).replace('COMMAND', 'check_myhttps_certificate!'+url)
+                config_services = config_services + BASECONF_SERVICE.replace('HOSTNAME', hn).replace('URL', 'https://'+url).replace('COMMAND', 'check_myhttps!'+url)
+                config_services = config_services + BASECONF_SERVICE.replace('HOSTNAME', hn).replace('URL', 'ssl-certificate : https://'+url).replace('COMMAND', 'check_myhttps_certificate!'+url)
         # On concatene conf host et services puis on ecrit le fichier
         conf = config_host + config_services
         if verbose:
