@@ -9,6 +9,13 @@ results = ""
 def host2ip(hostname):
     return socket.gethostbyname(hostname)
 
+def groupbyip(host):
+    ip = host2ip(host)
+    if ip in values.keys():
+        values[ip].append(host)
+    else:
+        values[ip] = [host]
+
 # Aide
 def usage():
     print "Usage: "+sys.argv[0]+" -i <liste> -o <fichier>"
@@ -43,17 +50,21 @@ if (names == "" or results == ""):
     usage()
     sys.exit(2)
 
+values = dict()
+
 # Conversion
 if not os.path.isfile(names):
     # Cas d'une liste de hosts
     for host in names.split():
-        print host + " : " + host2ip(host)
+        groupbyip(host)
 else:
     # Cas d'un fichier
     f = open(names, 'r')
     for host in f:
         host = host.rstrip()
-        print host + " : " + host2ip(host)
+        groupbyip(host)
     f.close()
+
+print values
 
 sys.exit(0)
