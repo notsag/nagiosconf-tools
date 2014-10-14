@@ -59,8 +59,8 @@ for row in data['data']:
     config_f = open(hn+'.cfg', 'w')
     config_host = BASECONF_HOST.replace('IPADDRESS', row[u'ip']).replace('HOSTNAME', hn)
     # On verifie que le nom repond en http et https
+    config_services = ""
     for url in row[u'hosts']:
-        config_services = ""
         # Si reponse HTTP on cree le service http
         if check_http(url):
             config_services = config_services + BASECONF_SERVICE.replace('HOSTNAME', hn).replace('URL', url).replace('COMMAND', 'check_myhttp!'+url)
