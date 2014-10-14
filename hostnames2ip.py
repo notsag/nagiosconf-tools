@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import getopt, sys, socket
+import getopt, sys, socket, os
 
 names = ""
 results = ""
@@ -11,14 +11,16 @@ def host2ip(hostname):
 
 # Aide
 def usage():
-    print "Usage: "+sys.argv[0]+" -i <fichier> -o <fichier>"
-    print "  -h, --help\taffiche ce message"
-    print "  -i, --input=\tliste de hostnames"
-    print "  -o, --output=\tfichier de sortie"
+    print "Usage: "+sys.argv[0]+" -i <liste> -o <fichier>"
+    print "OR: "+sys.argv[0]+" -f <fichier> -o <fichier>"
+    print "  -h, --help\t\taffiche ce message"
+    print "  -i, --input=\t\tliste de hostnames"
+    print "  -f, --input-file=\t\tfichier de hostnames"
+    print "  -o, --output=\t\tfichier de sortie"
 
-# Vérification des paramètres
+# Verification des parametres
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "hi:o:", ["help", "input=", "output="])
+    opts, args = getopt.getopt(sys.argv[1:], "hi:f:o:", ["help", "input=", "input-file=", "output="])
 except getopt.GetoptError as err:
     print str(err)
     usage()
@@ -30,6 +32,8 @@ for opt,arg in opts:
         sys.exit(0)
     elif opt in ("-i", "--input"):
         names = arg
+    elif opt in ("-f", "--input-file"):
+        names = arg
     elif opt in ("-o", "--output"):
         results = arg
     else:
@@ -40,7 +44,16 @@ if (names == "" or results == ""):
     sys.exit(2)
 
 # Conversion
-for host in names.split():
-    print host + " : " + host2ip(host)
+if not os.path.isfile(names):
+    # Cas d'une liste de hosts
+    for host in names.split():
+        print host + " : " + host2ip(host)
+else:
+    # Cas d'un fichier
+    f = open(names, 'r')
+    for host in f:
+        host = host.rstrip()
+        print host + " : " + host2ip(host)
+    f.close()
 
 sys.exit(0)
