@@ -75,12 +75,20 @@ else:
             next
     f.close()
 
+# Serialisation en JSON
+data = []
+
+for ip in values:
+    data.append(json.loads(json.dumps({"ip":ip,"hosts":values[ip]})))
+
+json_data = json.dumps({'data':data})
+
 # Si verbose, on affiche sur la sortie standard
 if verbose:
-    print json.dumps(values, indent=4, sort_keys=True)
+    print json.dumps(json.loads(json_data), indent=2)
 
 # On ecrit le resultat dans le fichier de sortie
 with open(results, 'w') as out:
-    json.dump(values, out, indent=4, sort_keys=True)
+    json.dump(json.loads(json_data), out)
 
 sys.exit(0)
